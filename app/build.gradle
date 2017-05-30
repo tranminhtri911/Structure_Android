@@ -54,33 +54,33 @@ android {
     debug {
       versionNameSuffix = "debug"
 
-      applicationVariants.all { variant -> appendVersionNameVersionCode(variant)
-      }
+//      applicationVariants.all { variant -> appendVersionNameVersionCode(variant)
+//      }
     }
     mock {
       versionNameSuffix = "mock"
       applicationIdSuffix = ".mock"
       signingConfig signingConfigs.debug
 
-      applicationVariants.all { variant -> appendVersionNameVersionCode(variant)
-      }
+//      applicationVariants.all { variant -> appendVersionNameVersionCode(variant)
+//      }
     }
     staging {
       versionNameSuffix = "stg"
       applicationIdSuffix = ".stg"
       signingConfig signingConfigs.debug
 
-      applicationVariants.all { variant -> appendVersionNameVersionCode(variant)
-      }
+//      applicationVariants.all { variant -> appendVersionNameVersionCode(variant)
+//      }
     }
     release {
       shrinkResources true
       minifyEnabled true
       signingConfig signingConfigs.release
       proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-
-      applicationVariants.all { variant -> appendVersionNameVersionCode(variant)
-      }
+//
+//      applicationVariants.all { variant -> appendVersionNameVersionCode(variant)
+//      }
     }
   }
 }
