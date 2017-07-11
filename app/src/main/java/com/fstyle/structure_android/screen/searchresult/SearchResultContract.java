@@ -1,6 +1,6 @@
 package com.fstyle.structure_android.screen.searchresult;
 
-import com.fstyle.structure_android.screen.BasePresenter;
+import com.fstyle.structure_android.screen.BaseController;
 import com.fstyle.structure_android.screen.BaseView;
 
 /**
@@ -14,8 +14,8 @@ interface SearchResultContract {
     }
 
     /**
-     * Presenter.
+     * Controller.
      */
-    interface Presenter extends BasePresenter<View> {
+    interface Controller extends BaseController<View> {
     }
 }

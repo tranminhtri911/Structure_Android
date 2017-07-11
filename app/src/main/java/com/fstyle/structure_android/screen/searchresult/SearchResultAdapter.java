@@ -22,10 +22,9 @@ public class SearchResultAdapter
 
     private List<User> mUsers;
 
-    protected SearchResultAdapter(@NonNull Context context, @NonNull List<User> users) {
+    SearchResultAdapter(@NonNull Context context) {
         super(context);
         mUsers = new ArrayList<>();
-        mUsers.addAll(users);
     }
 
     @Override
@@ -43,6 +42,11 @@ public class SearchResultAdapter
     @Override
     public int getItemCount() {
         return mUsers.size();
+    }
+
+    protected void updateData(List<User> users) {
+        mUsers.addAll(users);
+        notifyDataSetChanged();
     }
 
     /**

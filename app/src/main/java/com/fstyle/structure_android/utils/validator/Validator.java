@@ -7,7 +7,6 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
 import android.widget.EditText;
-import com.fstyle.structure_android.screen.BaseView;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -31,7 +30,6 @@ public class Validator {
 
     private Context mContext;
     private SparseArray<Method> mValidatedMethods;
-    private Object mObject;
     private String mMessage;
 
     private SparseArray<Integer> mAllErrorMessage;
@@ -42,17 +40,15 @@ public class Validator {
     /**
      * @param context Application context
      * @param clzz View
-     * @param <T> Class extend from {@link BaseView}
      */
-    public <T> Validator(@ApplicationContext Context context, T clzz) {
+    public Validator(@ApplicationContext Context context, Class clzz) {
         if (context instanceof Activity) {
             throw new ValidationException(
                     "Context should be get From Application to avoid leak memory");
         }
         mContext = context;
         mValidatedMethods = cacheValidatedMethod();
-        mAllErrorMessage = getAllErrorMessage(clzz.getClass());
-        mObject = clzz;
+        mAllErrorMessage = getAllErrorMessage(clzz);
     }
 
     private SparseArray<Method> cacheValidatedMethod() {
@@ -137,10 +133,10 @@ public class Validator {
         return isValid;
     }
 
-    public boolean validateAll() throws IllegalAccessException {
+    public <T> boolean validateAll(T object) throws IllegalAccessException {
         boolean isValid = true;
 
-        for (Field field : mObject.getClass().getDeclaredFields()) {
+        for (Field field : object.getClass().getDeclaredFields()) {
             Validation annotation = field.getAnnotation(Validation.class);
             if (annotation == null) {
                 continue;
@@ -151,10 +147,8 @@ public class Validator {
             field.setAccessible(true);
 
             boolean valid = false;
-            Object object = field.get(mObject);
-            if (object instanceof EditText) {
-                valid = validate((EditText) object, rules, isOptional);
-            }
+            Object obj = field.get(object);
+            valid = validate((EditText) obj, rules, isOptional);
             if (!valid) {
                 isValid = false;
             }

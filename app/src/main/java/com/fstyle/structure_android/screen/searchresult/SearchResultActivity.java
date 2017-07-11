@@ -14,7 +14,7 @@ import java.util.ArrayList;
  */
 public class SearchResultActivity extends BaseActivity implements SearchResultContract.View {
 
-    private SearchResultContract.Presenter mPresenter;
+    private SearchResultContract.Controller mController;
 
     private RecyclerView mRecyclerView;
 
@@ -25,26 +25,27 @@ public class SearchResultActivity extends BaseActivity implements SearchResultCo
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_searchresult);
 
-        mPresenter = new SearchResultPresenter();
-        mPresenter.setView(this);
+        mController = new SearchResultController();
+        mController.setView(this);
 
         mRecyclerView = (RecyclerView) findViewById(R.id.resultRecyclerView);
 
-        ArrayList<User> users = getIntent().getParcelableArrayListExtra(Constant.LIST_USER_ARGS);
-        mSearchResultAdapter = new SearchResultAdapter(this, users);
+        mSearchResultAdapter = new SearchResultAdapter(this);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setAdapter(mSearchResultAdapter);
+        ArrayList<User> users = getIntent().getParcelableArrayListExtra(Constant.LIST_USER_ARGS);
+        mSearchResultAdapter.updateData(users);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        mPresenter.onStart();
+        mController.onStart();
     }
 
     @Override
     protected void onStop() {
-        mPresenter.onStop();
+        mController.onStop();
         super.onStop();
     }
 }

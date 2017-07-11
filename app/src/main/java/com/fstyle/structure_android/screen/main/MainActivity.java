@@ -11,10 +11,7 @@ import com.fstyle.library.DialogAction;
 import com.fstyle.library.MaterialDialog;
 import com.fstyle.structure_android.R;
 import com.fstyle.structure_android.data.model.User;
-import com.fstyle.structure_android.data.source.UserRepositoryImpl;
-import com.fstyle.structure_android.data.source.remote.UserRemoteDataSource;
 import com.fstyle.structure_android.data.source.remote.api.error.BaseException;
-import com.fstyle.structure_android.data.source.remote.api.service.NameServiceClient;
 import com.fstyle.structure_android.screen.BaseActivity;
 import com.fstyle.structure_android.screen.searchresult.SearchResultActivity;
 import com.fstyle.structure_android.utils.common.SimpleTextWatcher;
@@ -23,7 +20,6 @@ import com.fstyle.structure_android.utils.rx.SchedulerProvider;
 import com.fstyle.structure_android.utils.validator.Rule;
 import com.fstyle.structure_android.utils.validator.ValidType;
 import com.fstyle.structure_android.utils.validator.Validation;
-import com.fstyle.structure_android.utils.validator.Validator;
 import com.fstyle.structure_android.widget.dialog.DialogManager;
 import com.fstyle.structure_android.widget.dialog.DialogManagerImpl;
 import java.util.ArrayList;
@@ -37,7 +33,7 @@ import static com.fstyle.structure_android.utils.Constant.LIST_USER_ARGS;
 public class MainActivity extends BaseActivity implements MainContract.View {
     private static final String TAG = MainActivity.class.getName();
 
-    private MainContract.Presenter mPresenter;
+    private MainContract.Controller mMainController;
 
     private TextInputLayout mTextInputLayoutKeyword;
     @Validation({
@@ -60,19 +56,16 @@ public class MainActivity extends BaseActivity implements MainContract.View {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        UserRepositoryImpl userRepository = new UserRepositoryImpl(null,
-                new UserRemoteDataSource(NameServiceClient.getInstance()));
-        Validator validator = new Validator(getApplicationContext(), this);
-        mPresenter = new MainPresenter(userRepository, validator);
-        mPresenter.setView(this);
-        mPresenter.setSchedulerProvider(SchedulerProvider.getInstance());
+        mMainController = new MainController();
+        mMainController.setView(this);
+        mMainController.setSchedulerProvider(SchedulerProvider.getInstance());
 
         mTextInputLayoutKeyword = (TextInputLayout) findViewById(R.id.txtInputLayoutKeyword);
         mEditTextKeyword = (EditText) findViewById(R.id.edtKeyword);
         mEditTextKeyword.addTextChangedListener(new SimpleTextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
-                mPresenter.validateKeywordInput(s.toString());
+                mMainController.validateKeywordInput(s.toString());
             }
         });
         mTextInputLayoutNumberLimit =
@@ -81,7 +74,7 @@ public class MainActivity extends BaseActivity implements MainContract.View {
         mEditNumberLimit.addTextChangedListener(new SimpleTextWatcher() {
             @Override
             public void afterTextChanged(Editable s) {
-                mPresenter.validateLimitNumberInput(s.toString());
+                mMainController.validateLimitNumberInput(s.toString());
             }
         });
 
@@ -91,12 +84,12 @@ public class MainActivity extends BaseActivity implements MainContract.View {
     @Override
     protected void onStart() {
         super.onStart();
-        mPresenter.onStart();
+        mMainController.onStart();
     }
 
     @Override
     protected void onStop() {
-        mPresenter.onStop();
+        mMainController.onStop();
         super.onStop();
     }
 
@@ -135,10 +128,10 @@ public class MainActivity extends BaseActivity implements MainContract.View {
         String keyWord = mEditTextKeyword.getText().toString().trim();
         String limit = mEditNumberLimit.getText().toString().trim();
 
-        if (!mPresenter.validateDataInput(keyWord, limit)) {
+        if (!mMainController.validateDataInput(keyWord, limit)) {
             return;
         }
         mDialogManager.showIndeterminateProgressDialog();
-        mPresenter.searchUsers(Integer.parseInt(limit), keyWord);
+        mMainController.searchUsers(Integer.parseInt(limit), keyWord);
     }
 }

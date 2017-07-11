@@ -2,7 +2,7 @@ package com.fstyle.structure_android.screen.main;
 
 import com.fstyle.structure_android.data.model.User;
 import com.fstyle.structure_android.data.source.remote.api.error.BaseException;
-import com.fstyle.structure_android.screen.BasePresenter;
+import com.fstyle.structure_android.screen.BaseController;
 import com.fstyle.structure_android.screen.BaseView;
 import com.fstyle.structure_android.utils.rx.BaseSchedulerProvider;
 import java.util.List;
@@ -27,15 +27,15 @@ public interface MainContract {
     }
 
     /**
-     * Presenter
+     * Controller
      */
-    interface Presenter extends BasePresenter<View> {
+    interface Controller extends BaseController<View> {
 
         void setSchedulerProvider(BaseSchedulerProvider schedulerProvider);
 
-        boolean validateKeywordInput(String keyword);
+        void validateKeywordInput(String keyword);
 
-        boolean validateLimitNumberInput(String limit);
+        void validateLimitNumberInput(String limit);
 
         boolean validateDataInput(String keyword, String limit);
 

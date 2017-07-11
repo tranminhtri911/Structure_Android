@@ -5,12 +5,12 @@ package com.fstyle.structure_android.screen.searchresult;
  * updates
  * the UI as required.
  */
-final class SearchResultPresenter implements SearchResultContract.Presenter {
-    private static final String TAG = SearchResultPresenter.class.getName();
+final class SearchResultController implements SearchResultContract.Controller {
+    private static final String TAG = SearchResultController.class.getName();
 
     private SearchResultContract.View mView;
 
-    SearchResultPresenter() {
+    SearchResultController() {
     }
 
     @Override
