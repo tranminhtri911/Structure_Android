@@ -75,7 +75,9 @@ This architecture apply:
 
 Diagram:
 
-- The same with MVP-VM structure
+- The same with MVP structure but in this case View (Activity, Fragment) also is ViewModel
+
+![alt text](https://github.com/daolq3012/Structure_Android/blob/master/images/mvp.png?raw=true)
 
 Source Code:
 
