@@ -2,11 +2,14 @@ package com.fstyle.structure_android.utils.validator;
 
 import android.app.Activity;
 import android.content.Context;
+import android.databinding.ObservableField;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.SparseArray;
-import com.fstyle.structure_android.screen.BaseViewModel;
+
+import com.fstyle.structure_android.viewmodel.BaseViewModel;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -15,11 +18,13 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Locale;
 import java.util.regex.Pattern;
-import rx.Observable;
-import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
+
+import io.reactivex.Single;
+import io.reactivex.SingleEmitter;
+import io.reactivex.SingleOnSubscribe;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by le.quang.dao on 16/03/2017.
@@ -136,7 +141,7 @@ public class Validator {
         return isValid;
     }
 
-    public boolean validateAll() throws IllegalAccessException {
+    public boolean validateAll() {
         boolean isValid = true;
 
         for (Field field : mObject.getClass().getDeclaredFields()) {
@@ -149,7 +154,13 @@ public class Validator {
             boolean isOptional = optional != null;
             field.setAccessible(true);
 
-            Object object = field.get(mObject);
+            Object object;
+            try {
+                object = ((ObservableField<String>)field.get(mObject)).get();
+            } catch (IllegalAccessException e) {
+                Log.e(TAG, "validateAll: ", e);
+                return false;
+            }
             boolean valid = validate(object, rules, isOptional);
             if (!valid) {
                 isValid = false;
@@ -159,9 +170,9 @@ public class Validator {
     }
 
     public void initNGWordPattern() {
-        Observable.create(new Observable.OnSubscribe<Pattern>() {
+        Single.create(new SingleOnSubscribe<Pattern>() {
             @Override
-            public void call(Subscriber<? super Pattern> subscriber) {
+            public void subscribe(SingleEmitter<Pattern> emitter) throws Exception {
                 try {
                     BufferedReader reader = new BufferedReader(
                             new InputStreamReader(mContext.getAssets().open("ng-word")));
@@ -174,25 +185,25 @@ public class Validator {
                             buffer.append("|").append(line.toLowerCase(Locale.ENGLISH));
                         }
                     }
-                    subscriber.onNext(Pattern.compile(buffer.append(")").toString()));
+                    emitter.onSuccess(Pattern.compile(buffer.append(")").toString()));
                 } catch (IOException e) {
-                    subscriber.onError(e);
+                    emitter.onError(e);
                 }
             }
         })
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<Pattern>() {
-                    @Override
-                    public void call(Pattern pattern) {
-                        mNGWordPattern = pattern;
-                    }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        throw new ValidationException("Error when open ng-word", throwable);
-                    }
-                });
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(new Consumer<Pattern>() {
+            @Override
+            public void accept(Pattern pattern) throws Exception {
+                mNGWordPattern = pattern;
+            }
+        }, new Consumer<Throwable>() {
+            @Override
+            public void accept(Throwable throwable) throws Exception {
+                throw new ValidationException("Error when open ng-word", throwable);
+            }
+        });
     }
 
     @ValidMethod(type = { ValidType.NG_WORD })

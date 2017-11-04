@@ -9,7 +9,7 @@
 
         <variable
             name="viewModel"
-            type="com.fstyle.structure_android.screen.main.MainViewModel"
+            type="com.fstyle.structure_android.viewmodel.SearchViewModel"
             />
 
     </data>
@@ -17,7 +17,7 @@
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context="com.fstyle.structure_android.screen.main.MainActivity"
+        tools:context="com.fstyle.structure_android.view.main.SearchActivity"
         >
 
         <android.support.design.widget.TextInputLayout
@@ -57,7 +57,6 @@
         <Button
             android:layout_width="100dp"
             android:layout_height="60dp"
-            android:enabled="@{viewModel.enableSearchButton}"
             android:onClick="@{viewModel::onSearchButtonClicked}"
             android:text="@string/search"
             android:textAllCaps="false"
@@ -89,7 +88,7 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/limit_number"
                 android:inputType="number"
-                android:text="@={viewModel.limit}"
+                android:text="@={viewModel.limitNumber}"
                 />
         </android.support.design.widget.TextInputLayout>
 

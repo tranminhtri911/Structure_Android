@@ -1,5 +1,4 @@
 apply plugin: 'com.android.application'
-apply plugin: 'com.neenbedankt.android-apt'
 apply plugin: 'realm-android'
 apply from: '../autodimension.gradle'
 
@@ -101,8 +100,8 @@ def appendVersionNameVersionCode(variant) {
         android.buildTypes.staging.name) {
       if (output.zipAlign) {
         def file = output.outputFile
-        output.outputFile = new File(file.parentFile,
-            "${variant.buildType.name}_${applicationId}_v${variant.versionName}-${variant.versionCode}.apk")
+//        output.outputFile = new File(file.parentFile,
+//            "${variant.buildType.name}_${applicationId}_v${variant.versionName}-${variant.versionCode}.apk")
       }
     }
   }
@@ -118,6 +117,7 @@ dependencies {
   compile dependencies.dialog
 
   compile dependencies.rxJava
+  
   compile dependencies.rxAndroid
 
   compile dependencies.retrofit2

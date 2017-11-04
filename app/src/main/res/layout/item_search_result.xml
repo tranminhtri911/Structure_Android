@@ -8,23 +8,26 @@
     <data>
 
         <variable
-            name="viewModel"
-            type="com.fstyle.structure_android.screen.searchresult.ItemSearchResultViewModel"
+            name="userViewModel"
+            type="com.fstyle.structure_android.viewmodel.UserViewModel"
             />
-
+        <variable
+            name="itemRecyclerViewViewModel"
+            type="com.fstyle.structure_android.viewmodel.ItemRecyclerViewViewModel"
+            />
     </data>
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="@{viewModel::onItemClicked}"
+        android:onClick="@{itemRecyclerViewViewModel::onItemRecyclerViewClick}"
         android:padding="@dimen/dp_10"
         >
         <TextView
             android:id="@+id/tvUserLogin"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="@{viewModel.userLogin}"
+            android:text="@{userViewModel.user.login}"
             android:textSize="@dimen/sp_23"
             app:layout_constraintHorizontal_bias="0.455"
             app:layout_constraintLeft_toLeftOf="parent"

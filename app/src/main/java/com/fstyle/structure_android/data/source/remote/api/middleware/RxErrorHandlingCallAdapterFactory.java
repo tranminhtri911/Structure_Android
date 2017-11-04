@@ -1,24 +1,36 @@
 package com.fstyle.structure_android.data.source.remote.api.middleware;
 
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
 
 import com.fstyle.structure_android.data.source.remote.api.error.BaseException;
-
 import com.fstyle.structure_android.data.source.remote.api.response.ErrorResponse;
 import com.google.gson.Gson;
+import com.jakewharton.retrofit2.adapter.rxjava2.HttpException;
+import com.jakewharton.retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
+
+import org.reactivestreams.Publisher;
+
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
+import io.reactivex.Completable;
+import io.reactivex.CompletableSource;
+import io.reactivex.Flowable;
+import io.reactivex.Maybe;
+import io.reactivex.MaybeSource;
+import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
+import io.reactivex.Single;
+import io.reactivex.SingleSource;
+import io.reactivex.functions.Function;
 import retrofit2.Call;
 import retrofit2.CallAdapter;
 import retrofit2.Response;
 import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava.HttpException;
-import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
-import rx.Observable;
-import rx.functions.Func1;
 
 /**
  * ErrorHandling:
@@ -29,10 +41,10 @@ public final class RxErrorHandlingCallAdapterFactory extends CallAdapter.Factory
 
     private static final String TAG = RxErrorHandlingCallAdapterFactory.class.getName();
 
-    private final RxJavaCallAdapterFactory original;
+    private final RxJava2CallAdapterFactory original;
 
     private RxErrorHandlingCallAdapterFactory() {
-        original = RxJavaCallAdapterFactory.create();
+        original = RxJava2CallAdapterFactory.create();
     }
 
     public static CallAdapter.Factory create() {
@@ -40,19 +52,20 @@ public final class RxErrorHandlingCallAdapterFactory extends CallAdapter.Factory
     }
 
     @Override
-    public CallAdapter<?> get(Type returnType, Annotation[] annotations, Retrofit retrofit) {
-        return new RxCallAdapterWrapper(retrofit, original.get(returnType, annotations, retrofit));
+    public CallAdapter<?, ?> get(@NonNull Type returnType, @NonNull Annotation[] annotations, @NonNull Retrofit retrofit) {
+        return new RxCallAdapterWrapper(returnType,
+                original.get(returnType, annotations, retrofit));
     }
 
     /**
      * RxCallAdapterWrapper
      */
-    private static class RxCallAdapterWrapper implements CallAdapter<Observable<?>> {
-        private final Retrofit retrofit;
-        private final CallAdapter<?> wrapped;
+    class RxCallAdapterWrapper<R> implements CallAdapter<R, Object> {
+        private final Type returnType;
+        private final CallAdapter<R, Object> wrapped;
 
-        RxCallAdapterWrapper(Retrofit retrofit, CallAdapter<?> wrapped) {
-            this.retrofit = retrofit;
+        RxCallAdapterWrapper(Type type, CallAdapter<R, Object> wrapped) {
+            returnType = type;
             this.wrapped = wrapped;
         }
 
@@ -61,16 +74,72 @@ public final class RxErrorHandlingCallAdapterFactory extends CallAdapter.Factory
             return wrapped.responseType();
         }
 
-        @SuppressWarnings("unchecked")
         @Override
-        public <R> Observable<?> adapt(Call<R> call) {
-            return ((Observable) wrapped.adapt(call)).onErrorResumeNext(new Func1<Throwable,
-                    Observable>() {
-                @Override
-                public Observable call(Throwable throwable) {
-                    return Observable.error(convertToBaseException(throwable));
-                }
-            });
+        public Object adapt(@NonNull Call<R> call) {
+            Class<?> rawType = getRawType(returnType);
+
+            boolean isFlowable = rawType == Flowable.class;
+            boolean isSingle = rawType == Single.class;
+            boolean isMaybe = rawType == Maybe.class;
+            boolean isCompletable = rawType == Completable.class;
+            if (rawType != Observable.class && !isFlowable && !isSingle && !isMaybe) {
+                return null;
+            }
+            if (!(returnType instanceof ParameterizedType)) {
+                String name = isFlowable ? "Flowable"
+                        : isSingle ? "Single" : isMaybe ? "Maybe" : "Observable";
+                throw new IllegalStateException(name
+                        + " return type must be parameterized"
+                        + " as "
+                        + name
+                        + "<Foo> or "
+                        + name
+                        + "<? extends Foo>");
+            }
+
+            if (isFlowable) {
+                return ((Flowable) wrapped.adapt(call)).onErrorResumeNext(
+                        new Function<Throwable, Publisher>() {
+                            @Override
+                            public Publisher apply(Throwable throwable) throws Exception {
+                                return Flowable.error(convertToBaseException(throwable));
+                            }
+                        });
+            }
+            if (isSingle) {
+                return ((Single) wrapped.adapt(call)).onErrorResumeNext(
+                        new Function<Throwable, SingleSource>() {
+                            @Override
+                            public SingleSource apply(Throwable throwable) throws Exception {
+                                return Single.error(convertToBaseException(throwable));
+                            }
+                        });
+            }
+            if (isMaybe) {
+                return ((Maybe) wrapped.adapt(call)).onErrorResumeNext(
+                        new Function<Throwable, MaybeSource>() {
+                            @Override
+                            public MaybeSource apply(Throwable throwable) throws Exception {
+                                return Maybe.error(convertToBaseException(throwable));
+                            }
+                        });
+            }
+            if (isCompletable) {
+                return ((Completable) wrapped.adapt(call)).onErrorResumeNext(
+                        new Function<Throwable, CompletableSource>() {
+                            @Override
+                            public CompletableSource apply(Throwable throwable) throws Exception {
+                                return Completable.error(convertToBaseException(throwable));
+                            }
+                        });
+            }
+            return ((Observable) wrapped.adapt(call)).onErrorResumeNext(
+                    new Function<Throwable, ObservableSource>() {
+                        @Override
+                        public ObservableSource apply(Throwable throwable) throws Exception {
+                            return Observable.error(convertToBaseException(throwable));
+                        }
+                    });
         }
 
         private BaseException convertToBaseException(Throwable throwable) {

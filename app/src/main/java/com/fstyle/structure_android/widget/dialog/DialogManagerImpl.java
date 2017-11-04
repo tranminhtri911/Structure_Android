@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.annotation.ArrayRes;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
+
 import com.fstyle.library.DialogAction;
 import com.fstyle.library.MaterialDialog;
 import com.fstyle.structure_android.R;
@@ -41,11 +42,9 @@ public class DialogManagerImpl implements DialogManager {
     }
 
     @Override
-    public void dialogError(String content,
-            MaterialDialog.SingleButtonCallback positiveButtonListener) {
+    public void dialogError(String content) {
         new MaterialDialog.Builder(mContext).content(content)
-                .positiveText(R.string.retry)
-                .onPositive(positiveButtonListener)
+                .positiveText(android.R.string.ok)
                 .show();
     }
 

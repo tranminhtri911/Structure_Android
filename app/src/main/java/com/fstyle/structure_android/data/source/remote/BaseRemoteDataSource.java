@@ -8,7 +8,7 @@ import com.fstyle.structure_android.data.source.remote.api.service.NameApi;
 
 public abstract class BaseRemoteDataSource {
 
-    NameApi mNameApi;
+    protected NameApi mNameApi;
 
     public BaseRemoteDataSource(NameApi nameApi) {
         mNameApi = nameApi;

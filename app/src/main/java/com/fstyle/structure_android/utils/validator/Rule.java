@@ -1,6 +1,7 @@
 package com.fstyle.structure_android.utils.validator;
 
 import android.support.annotation.StringRes;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

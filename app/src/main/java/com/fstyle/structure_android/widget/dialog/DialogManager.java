@@ -2,6 +2,7 @@ package com.fstyle.structure_android.widget.dialog;
 
 import android.support.annotation.ArrayRes;
 import android.support.annotation.DrawableRes;
+
 import com.fstyle.library.MaterialDialog;
 
 /**
@@ -19,7 +20,7 @@ public interface DialogManager {
 
     void dismissProgressDialog();
 
-    void dialogError(String content, MaterialDialog.SingleButtonCallback positiveButtonListener);
+    void dialogError(String content);
 
     /**
      * <h1>BasicWithoutTitle Dialog</h1>

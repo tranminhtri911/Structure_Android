@@ -2,6 +2,7 @@ package com.fstyle.structure_android.data.source.remote.api.service;
 
 import android.app.Application;
 import android.support.annotation.NonNull;
+
 import com.fstyle.structure_android.utils.Constant;
 
 /**

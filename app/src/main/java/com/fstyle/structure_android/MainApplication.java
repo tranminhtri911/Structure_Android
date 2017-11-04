@@ -1,8 +1,10 @@
 package com.fstyle.structure_android;
 
 import android.app.Application;
+
 import com.fstyle.structure_android.data.source.local.realm.DataLocalMigration;
 import com.fstyle.structure_android.data.source.remote.api.service.NameServiceClient;
+
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 
